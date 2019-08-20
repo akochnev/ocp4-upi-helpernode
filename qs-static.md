@@ -20,7 +20,7 @@ cd ~/ocp4-workingdir
 Download the virtual network configuration file, [virt-net.xml](./virt-net.xml)
 
 ```
-wget https://raw.githubusercontent.com/christianh814/ocp4-upi-helpernode/master/virt-net.xml
+wget https://raw.githubusercontent.com/heatmiser/ocp4-upi-helpernode/master/virt-net.xml
 ```
 
 Create a virtual network using this file file provided in this repo (modify if you need to).
@@ -42,7 +42,7 @@ virsh net-start openshift4
 Download the [Kickstart file](helper-ks.cfg) for the helper node.
 
 ```
-wget https://raw.githubusercontent.com/christianh814/ocp4-upi-helpernode/master/helper-ks.cfg
+wget https://raw.githubusercontent.com/heatmiser/ocp4-upi-helpernode/master/helper-ks.cfg
 ```
 
 Edit `helper-ks.cfg` for your environment and use it to install the helper. The following command installs it "unattended".
@@ -50,8 +50,8 @@ Edit `helper-ks.cfg` for your environment and use it to install the helper. The 
 > **NOTE** Change the path to the ISO for your environment
 
 ```
-virt-install --name="ocp4-aHelper" --vcpus=2 --ram=4096 \
---disk path=/var/lib/libvirt/images/ocp4-aHelper.qcow2,bus=virtio,size=30 \
+virt-install --name="ocp4-helper" --vcpus=2 --ram=4096 \
+--disk path=/var/lib/libvirt/images/ocp4-helper.qcow2,bus=virtio,size=30 \
 --os-variant centos7.0 --network network=openshift4,model=virtio \
 --boot menu=on --location /var/lib/libvirt/ISO/CentOS-7-x86_64-Minimal-1810.iso \
 --initrd-inject helper-ks.cfg --extra-args "inst.ks=file:/helper-ks.cfg" --noautoconsole
@@ -69,13 +69,13 @@ The provided Kickstart file installs the helper with the following settings (whi
 You can watch the progress by lauching the viewer
 
 ```
-virt-viewer --domain-name ocp4-aHelper
+virt-viewer --domain-name ocp4-helper
 ```
 
 Once it's done, it'll shut off...turn it on with the following command
 
 ```
-virsh start ocp4-aHelper
+virsh start ocp4-helper
 ```
 
 ## Prepare the Helper Node
@@ -92,7 +92,7 @@ Install `ansible` and `git` and clone this repo
 
 ```
 yum -y install ansible git
-git clone https://github.com/christianh814/ocp4-upi-helpernode
+git clone https://github.com/heatmiser/ocp4-upi-helpernode
 cd ocp4-upi-helpernode
 ```
 

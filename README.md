@@ -6,14 +6,14 @@ This assumes the following
 2. The network you're on does NOT have DHCP
 3. The helpernode will be your LB/DHCP/PXE/DNS and HTTPD server
 4. You still have to do the OpenShift Install steps by hand (this just sets up the node to help you)
-5. I used CentOS 7
+5. Choose between CentOS 7 or RHEL 7
 6. You will be running the `openshift-install` command from this helpernode
 
 You can visit the [quickstart](quickstart.md) to...quickly start :)
 
 ## Prereqs
 
-Install a CentOS 7 server with this recommended setup:
+Install a CentOS/RHEL 7 server with this recommended setup:
 
 * 4 vCPUs
 * 4 GB of RAM
@@ -24,7 +24,7 @@ Then prepare for the install
 
 ```
 yum -y install ansible git
-git clone https://github.com/christianh814/ocp4-upi-helpernode
+git clone https://github.com/heatmiser/ocp4-upi-helpernode
 cd ocp4-upi-helpernode
 ```
 

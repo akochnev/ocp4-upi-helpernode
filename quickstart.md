@@ -4,13 +4,13 @@ This quickstart will get you up and running on `libvirt`. This should work on ot
 
 > **NOTE** If you want to use static ips follow [this guide](qs-static.md)
 
-To start login to your virtualization server / hypervisor
+To get started, login to your virtualization server / hypervisor. Example KVM hypervisor kickstarts for [CentOS 7](centos7-hypervisor-ks.cfg) and [RHEL 7](rhel7-hypervisor-ks.cfg) (RHEL 7 kickstart requires edits for RH user account/password or subscription id/activation key prior to launching installation)
 
 ```
 ssh virt0.example.com
 ```
 
-And create a working directory
+...and create a working directory:
 
 ```
 mkdir ~/ocp4-workingdir
@@ -22,43 +22,67 @@ cd ~/ocp4-workingdir
 Download the virtual network configuration file, [virt-net.xml](./virt-net.xml)
 
 ```
-wget https://raw.githubusercontent.com/christianh814/ocp4-upi-helpernode/master/virt-net.xml
+wget https://raw.githubusercontent.com/heatmiser/ocp4-upi-helpernode/master/virt-net.xml
 ```
 
-Create a virtual network using this file file provided in this repo (modify if you need to).
+Create a virtual network using virt-net.xml (examine settings in virt-net.xml prior to creating via virsh, modification for your environment may be required, however, note that this may impact the IP address scheme utilized in this quickstart):
 
 ```
 virsh net-define --file virt-net.xml
 ```
 
-Make sure you set it to autostart on boot
+Make sure you set the openshift4 net to autostart on boot:
 
 ```
 virsh net-autostart openshift4
 virsh net-start openshift4
 ```
 
-## Create a CentOS 7 VM
+## Create CentOS 7 VM or RHEL 7 VM - refer to the appropriate section depending on your OS choice
 
-Download the [Kickstart file](helper-ks.cfg) for the helper node.
+__Create a CentOS 7 VM__
+
+Download the [Kickstart file](centos7-helper-ks.cfg) for the helper node.
 
 ```
-wget https://raw.githubusercontent.com/christianh814/ocp4-upi-helpernode/master/helper-ks.cfg
+wget https://raw.githubusercontent.com/heatmiser/ocp4-upi-helpernode/master/centos7-helper-ks.cfg
 ```
 
-Edit `helper-ks.cfg` for your environment and use it to install the helper. The following command installs it "unattended".
+Edit `centos7-helper-ks.cfg` for your environment and use it to install the helper. The following command installs it "unattended":
 
 > **NOTE** Change the path to the ISO for your environment
 
 ```
-virt-install --name="ocp4-aHelper" --vcpus=2 --ram=4096 \
---disk path=/var/lib/libvirt/images/ocp4-aHelper.qcow2,bus=virtio,size=30 \
+virt-install --name="ocp4-helper" --vcpus=2 --ram=4096 \
+--disk path=/var/lib/libvirt/images/ocp4-helper.qcow2,bus=virtio,size=30 \
 --os-variant centos7.0 --network network=openshift4,model=virtio \
 --boot menu=on --location /var/lib/libvirt/ISO/CentOS-7-x86_64-Minimal-1810.iso \
---initrd-inject helper-ks.cfg --extra-args "inst.ks=file:/helper-ks.cfg" --noautoconsole
+--initrd-inject centos7-helper-ks.cfg --extra-args "inst.ks=file:/centos7-helper-ks.cfg" --noautoconsole
 ```
 
-The provided Kickstart file installs the helper with the following settings (which is based on the [virt-net.xml](./virt-net.xml) file that was used before).
+__Create a RHEL 7 VM__
+
+Download the [Kickstart file](rhel7-helper-ks.cfg) for the helper node.
+
+```
+wget https://raw.githubusercontent.com/heatmiser/ocp4-upi-helpernode/master/rhel7-helper-ks.cfg
+```
+
+Edit `rhel7-helper-ks.cfg` for your environment and use it to install the helper. The following command installs it "unattended":
+
+> **NOTE** Change the path to the ISO for your environment
+
+```
+virt-install --name="ocp4-helper" --vcpus=2 --ram=4096 \
+--disk path=/var/lib/libvirt/images/ocp4-helper.qcow2,bus=virtio,size=30 \
+--os-variant rhel7.0 --network network=openshift4,model=virtio \
+--boot menu=on --location /var/lib/libvirt/ISO/rhel-server-7.7-x86_64-dvd.iso \
+--initrd-inject rhel7-helper-ks.cfg --extra-args "inst.ks=file:/rhel7-helper-ks.cfg" --noautoconsole
+```
+
+
+
+Either provided Kickstart file installs the helper VM with the following settings (which is based on the [virt-net.xml](./virt-net.xml) file that was used before).
 
 * IP - 192.168.7.77
 * NetMask - 255.255.255.0
@@ -68,13 +92,13 @@ The provided Kickstart file installs the helper with the following settings (whi
 You can watch the progress by lauching the viewer
 
 ```
-virt-viewer --domain-name ocp4-aHelper
+virt-viewer --domain-name ocp4-helper
 ```
 
-Once it's done, it'll shut off...turn it on with the following command
+Once the installation is complete, the VM will shut down...start it up with the following command:
 
 ```
-virsh start ocp4-aHelper
+virsh start ocp4-helper
 ```
 
 ## Create "empty" VMs
@@ -127,7 +151,7 @@ Install `ansible` and `git` and clone this repo
 
 ```
 yum -y install ansible git
-git clone https://github.com/christianh814/ocp4-upi-helpernode
+git clone https://github.com/heatmiser/ocp4-upi-helpernode
 cd ocp4-upi-helpernode
 ```
 

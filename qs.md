@@ -5,7 +5,7 @@ This quickstart will get you up and running on `libvirt`. This should work on ot
 To start clone this repo
 
 ```
-git clone https://github.com/christianh814/ocp4-upi-helpernode
+git clone https://github.com/heatmiser/ocp4-upi-helpernode
 cd ocp4-upi-helpernode/
 ```
 
@@ -29,11 +29,11 @@ virsh net-start openshift4
 Create a VM for the helper node
 
 ```
-virt-install --name="ocp4-aHelper" --vcpus=2 --ram=4096 \
---disk path=/var/lib/libvirt/images/ocp4-aHelper.qcow2,bus=virtio,size=30 \
+virt-install --name="ocp4-helper" --vcpus=2 --ram=4096 \
+--disk path=/var/lib/libvirt/images/ocp4-helper.qcow2,bus=virtio,size=30 \
 --os-variant centos7.0 --network network=openshift4,model=virtio \
---boot menu=on --print-xml > ocp4-aHelper.xml
-virsh define --file ocp4-aHelper.xml
+--boot menu=on --print-xml > ocp4-helper.xml
+virsh define --file ocp4-helper.xml
 ```
 
 Launch `virt-manager` and install CentOS 7 with the following
@@ -91,7 +91,7 @@ Install `ansible` and `git` and clone this repo
 
 ```
 yum -y install ansible git
-git clone https://github.com/christianh814/ocp4-upi-helpernode
+git clone https://github.com/heatmiser/ocp4-upi-helpernode
 cd ocp4-upi-helpernode
 ```
 
