@@ -103,32 +103,21 @@ Create (but do NOT install) 6 empty VMs. Please follow the [min requirements](ht
 
 > Make sure you attached these to the `openshift4` network!
 
-__Masters__
-
-Create the master VMs:
-
 ```
-for i in master{0..2}
-do 
-  virt-install --name="ocp4-${i}" --vcpus=4 --ram=12288 \
-  --disk path=/var/lib/libvirt/images/ocp4-${i}.qcow2,bus=virtio,size=120 \
+storagepool="default"
+for i in master{0..2} worker{0..1} bootstrap
+do
+  if [[ "$i" == "master"* ]]; then
+      mem=12288
+  else
+      mem=8192
+  fi
+  virt-install --name="ocp4-${i}" \
+  --cpu=host --vcpus=4 --ram=${mem} \
+  --controller type=scsi,model=virtio-scsi \
+  --disk pool=${storagepool},bus=scsi,discard='unmap',format=qcow2,size=120 \
   --os-variant rhel8.0 --network network=openshift4,model=virtio \
-  --boot menu=on --print-xml > ocp4-$i.xml
-  virsh define --file ocp4-$i.xml
-done
-```
-
-__Workers and Bootstrap__
-
-Create the bootstrap and worker VMs:
-
-```
-for i in worker{0..1} bootstrap
-do 
-  virt-install --name="ocp4-${i}" --vcpus=4 --ram=8192 \
-  --disk path=/var/lib/libvirt/images/ocp4-${i}.qcow2,bus=virtio,size=120 \
-  --os-variant rhel8.0 --network network=openshift4,model=virtio \
-  --boot menu=on --print-xml > ocp4-$i.xml
+  --boot hd,network,menu=on --print-xml > ocp4-$i.xml
   virsh define --file ocp4-$i.xml
 done
 ```
@@ -257,7 +246,7 @@ You'll see the bootstrap turn "green" and then the masters turn "green", then th
 
 ## Wait for install
 
-The boostrap VM actually does the install for you; you can track it with the following command:
+The boostrap VM actually does the install for you; while still on the helper VM in the in the ~/ocp4 directory, you can track the bootstrapping process with the following command:
 
 ```
 openshift-install wait-for bootstrap-complete --log-level debug
@@ -279,7 +268,7 @@ INFO It is now safe to remove the bootstrap resources
 
 ## Finish Install
 
-First, login to your cluster
+First, login to your cluster. Again, on the helper VM, execute the following in a terminal session:
 
 ```
 export KUBECONFIG=/root/ocp4/auth/kubeconfig
