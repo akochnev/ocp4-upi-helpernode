@@ -80,7 +80,7 @@ virt-install --name="ocp4-helper" --vcpus=2 --ram=4096 \
 --initrd-inject rhel7-helper-ks.cfg --extra-args "inst.ks=file:/rhel7-helper-ks.cfg" --noautoconsole
 ```
 
-
+__Helper VM created, continue...__
 
 Both the CentOS and RHEL Kickstarts configure the helper VM with the following network settings (which is based on virtual network configured via [virt-net.xml](./virt-net.xml) utilized  before).
 
