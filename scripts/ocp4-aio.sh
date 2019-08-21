@@ -1,32 +1,21 @@
 #Create single master and single worker cluster (all-in-one small stack version)
 export storagepool="virtimages"
 
-for i in master
+for i in master worker bootstrap
 do 
+  if [[ "$i" == "master"* ]]; then
+      mem=12288
+  else
+      mem=8192
+  fi
   sudo virt-install --name="ocp4-${i}" \
-  --cpu=host --vcpus=4 --ram=12288 \
+  --cpu=host --vcpus=4 --ram=${mem} \
   --controller type=scsi,model=virtio-scsi \
   --disk pool=${storagepool},bus=scsi,discard='unmap',format=qcow2,size=120 \
   --os-variant rhel8.0 --network network=openshift4,model=virtio \
   --boot hd,network,menu=on --print-xml > ocp4-$i.xml
-  sleep 2
   sudo virsh define --file ocp4-$i.xml
 done
-
-#Create a bootstrap VM and worker VM
-
-for i in worker bootstrap
-do 
-  sudo virt-install --name="ocp4-${i}" \
-  --cpu=host --vcpus=4 --ram=8192 \
-  --controller type=scsi,model=virtio-scsi \
-  --disk pool=${storagepool},bus=scsi,discard='unmap',format=qcow2,size=120 \
-  --os-variant rhel8.0 --network network=openshift4,model=virtio \
-  --boot hd,network,menu=on --print-xml > ocp4-$i.xml
-  sleep 2
-  sudo virsh define --file ocp4-$i.xml
-done
-
 
 for i in bootstrap master worker
 do
