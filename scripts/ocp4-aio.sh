@@ -1,12 +1,14 @@
 #Create single master and single worker cluster (all-in-one small stack version)
-export libvirtimagepath="/u01/libvirt/images"
+export storagepool="virtimages"
 
 for i in master
 do 
-  sudo virt-install --name="ocp4-${i}" --vcpus=4 --ram=12288 \
-  --disk path=${libvirtimagepath}/ocp4-${i}.qcow2,bus=virtio,size=120 \
+  sudo virt-install --name="ocp4-${i}" \
+  --cpu=host --vcpus=4 --ram=12288 \
+  --controller type=scsi,model=virtio-scsi \
+  --disk pool=${storagepool},bus=scsi,discard='unmap',format=qcow2,size=120 \
   --os-variant rhel8.0 --network network=openshift4,model=virtio \
-  --boot menu=on --print-xml > ocp4-$i.xml
+  --boot hd,network,menu=on --print-xml > ocp4-$i.xml
   sleep 2
   sudo virsh define --file ocp4-$i.xml
 done
@@ -15,10 +17,12 @@ done
 
 for i in worker bootstrap
 do 
-  sudo virt-install --name="ocp4-${i}" --vcpus=4 --ram=8192 \
-  --disk path=${libvirtimagepath}/ocp4-${i}.qcow2,bus=virtio,size=120 \
+  sudo virt-install --name="ocp4-${i}" \
+  --cpu=host --vcpus=4 --ram=8192 \
+  --controller type=scsi,model=virtio-scsi \
+  --disk pool=${storagepool},bus=scsi,discard='unmap',format=qcow2,size=120 \
   --os-variant rhel8.0 --network network=openshift4,model=virtio \
-  --boot menu=on --print-xml > ocp4-$i.xml
+  --boot hd,network,menu=on --print-xml > ocp4-$i.xml
   sleep 2
   sudo virsh define --file ocp4-$i.xml
 done
@@ -37,7 +41,7 @@ done
 (
 cat <<EOF
 ---
-disk: vda
+disk: sda
 helper:
   name: "helper"
   ipaddr: "192.168.7.77"
