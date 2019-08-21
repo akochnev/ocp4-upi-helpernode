@@ -1,12 +1,13 @@
 #Create single master and single worker cluster (all-in-one small stack version)
-libvirtimagepath="/u01/libvirt/images"
+export libvirtimagepath="/u01/libvirt/images"
 
 for i in master
 do 
   sudo virt-install --name="ocp4-${i}" --vcpus=4 --ram=12288 \
-  --disk path=$libvirtimagepath/ocp4-${i}.qcow2,bus=virtio,size=120 \
+  --disk path=${libvirtimagepath}/ocp4-${i}.qcow2,bus=virtio,size=120 \
   --os-variant rhel8.0 --network network=openshift4,model=virtio \
   --boot menu=on --print-xml > ocp4-$i.xml
+  sleep 2
   sudo virsh define --file ocp4-$i.xml
 done
 
@@ -15,9 +16,10 @@ done
 for i in worker bootstrap
 do 
   sudo virt-install --name="ocp4-${i}" --vcpus=4 --ram=8192 \
-  --disk path=$libvirtimagepathu01/ocp4-${i}.qcow2,bus=virtio,size=120 \
+  --disk path=${libvirtimagepath}/ocp4-${i}.qcow2,bus=virtio,size=120 \
   --os-variant rhel8.0 --network network=openshift4,model=virtio \
   --boot menu=on --print-xml > ocp4-$i.xml
+  sleep 2
   sudo virsh define --file ocp4-$i.xml
 done
 
