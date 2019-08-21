@@ -67,5 +67,5 @@ workers:
     ipaddr: "192.168.7.22"
     macaddr: "$workermacaddy"
 EOF
-) > aio-vars.xml
+) > aio-vars.yaml
 
