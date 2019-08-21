@@ -82,7 +82,7 @@ virt-install --name="ocp4-helper" --vcpus=2 --ram=4096 \
 
 
 
-Either provided Kickstart file installs the helper VM with the following settings (which is based on the [virt-net.xml](./virt-net.xml) file that was used before).
+Both the CentOS and RHEL Kickstarts configure the helper VM with the following network settings (which is based on virtual network configured via [virt-net.xml](./virt-net.xml) utilized  before).
 
 * IP - 192.168.7.77
 * NetMask - 255.255.255.0
@@ -95,11 +95,7 @@ You can watch the progress by lauching the viewer
 virt-viewer --domain-name ocp4-helper
 ```
 
-Once the installation is complete, the VM will shut down...start it up with the following command:
-
-```
-virsh start ocp4-helper
-```
+Once the installation is complete, the helper VM will shut down.
 
 ## Create "empty" VMs
 
@@ -139,15 +135,21 @@ done
 
 ## Prepare the Helper Node
 
-After the helper node is installed; login to it
+Start the helper VM with the following command:
+
+```
+virsh start ocp4-helper
+```
+
+Once boot-up has completed, either login to the ocp4-helper console via virt-viewer or ssh into ocp4-helper from a terminal session on the hypervisor:
 
 ```
 ssh root@192.168.7.77
 ```
 
-Install `ansible` and `git` and clone this repo
+Install `ansible` and `git` and then clone [this repo](https://github.com/heatmiser/ocp4-upi-helpernode.git)
 
-> **NOTE** If using RHEL 7 - you need to enable the `rhel-7-server-rpms` and the `rhel-7-server-extras-rpms` repos
+> **NOTE** If you installed your RHEL 7 helper node with the provided rhel7-helper-ks.cfg kickstart, ansible and git are already installed, skip the yum step listed below - otherwise, you will need to enable the `rhel-7-server-rpms` and the `rhel-7-server-extras-rpms` repos via `subscription-manager`
 
 ```
 yum -y install ansible git
@@ -155,24 +157,24 @@ git clone https://github.com/heatmiser/ocp4-upi-helpernode
 cd ocp4-upi-helpernode
 ```
 
-Edit the [vars.yaml](./vars.yaml) file with the mac addresses of the "blank" VMs. Get the Mac addresses with this command running from your hypervisor host:
+Edit the [vars.yaml](./vars.yaml) file with the mac addresses of the "blank" VMs. Get the MAC addresses with this command from a terminal session on your hypervisor host:
 
 ```
 for i in bootstrap master{0..2} worker{0..1}
 do
-  echo -ne "${i}\t" ; virsh dumpxml ocp4-${i} | grep "mac address" | cut -d\' -f2
+  echo -ne "ocp4-${i}\t" ; virsh dumpxml ocp4-${i} | grep "mac address" | cut -d\' -f2
 done
 ```
 
-## Run the playbook
+## Run the ansible playbook
 
-Run the playbook to setup your helper node
+Run the ansible playbook to setup your helper node
 
 ```
 ansible-playbook -e @vars.yaml tasks/main.yml
 ```
 
-After it is done run the following to get info about your environment and some install help
+After the playbook has completed, execute `helpernodecheck` to get info about your environment and some install help
 
 
 ```
