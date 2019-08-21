@@ -19,7 +19,7 @@ cd ~/ocp4-workingdir
 
 ## Create Virtual Network
 
-Download the virtual network configuration file, [virt-net.xml](./virt-net.xml)
+Download the virtual network configuration file, [virt-net.xml](./virt-net.xml):
 
 ```
 wget https://raw.githubusercontent.com/heatmiser/ocp4-upi-helpernode/master/virt-net.xml
@@ -42,7 +42,7 @@ virsh net-start openshift4
 
 __Create a CentOS 7 VM__
 
-Download the [Kickstart file](centos7-helper-ks.cfg) for the helper node.
+Download the [Kickstart file](centos7-helper-ks.cfg) for the helper node:
 
 ```
 wget https://raw.githubusercontent.com/heatmiser/ocp4-upi-helpernode/master/centos7-helper-ks.cfg
@@ -62,7 +62,7 @@ virt-install --name="ocp4-helper" --vcpus=2 --ram=4096 \
 
 __Create a RHEL 7 VM__
 
-Download the [Kickstart file](rhel7-helper-ks.cfg) for the helper node.
+Download the [Kickstart file](rhel7-helper-ks.cfg) for the helper node:
 
 ```
 wget https://raw.githubusercontent.com/heatmiser/ocp4-upi-helpernode/master/rhel7-helper-ks.cfg
@@ -89,7 +89,7 @@ Both the CentOS and RHEL Kickstarts configure the helper VM with the following n
 * Default Gateway - 192.168.7.1
 * DNS Server - 8.8.8.8
 
-You can watch the progress by lauching the viewer
+You can watch the progress by lauching the viewer:
 
 ```
 virt-viewer --domain-name ocp4-helper
@@ -105,7 +105,7 @@ Create (but do NOT install) 6 empty VMs. Please follow the [min requirements](ht
 
 __Masters__
 
-Create the master VMs
+Create the master VMs:
 
 ```
 for i in master{0..2}
@@ -120,7 +120,7 @@ done
 
 __Workers and Bootstrap__
 
-Create the bootstrap and worker VMs
+Create the bootstrap and worker VMs:
 
 ```
 for i in worker{0..1} bootstrap
@@ -149,7 +149,7 @@ ssh root@192.168.7.77
 
 Install `ansible` and `git` and then clone [this repo](https://github.com/heatmiser/ocp4-upi-helpernode.git)
 
-> **NOTE** If you installed your RHEL 7 helper node with the provided rhel7-helper-ks.cfg kickstart, ansible and git are already installed, skip the yum step listed below - otherwise, you will need to enable the `rhel-7-server-rpms` and the `rhel-7-server-extras-rpms` repos via `subscription-manager`
+> **NOTE** If you installed your RHEL 7 helper node with the provided rhel7-helper-ks.cfg kickstart, ansible and git are already installed, skip the yum step listed below - otherwise, you will need to enable the `rhel-7-server-rpms` and the `rhel-7-server-extras-rpms` repos via `subscription-manager`:
 
 ```
 yum -y install ansible git
@@ -168,13 +168,13 @@ done
 
 ## Run the ansible playbook
 
-Run the ansible playbook to setup your helper node
+Run the ansible playbook to setup your helper node:
 
 ```
 ansible-playbook -e @vars.yaml tasks/main.yml
 ```
 
-After the playbook has completed, execute `helpernodecheck` to get info about your environment and some install help
+After the playbook has completed, execute `helpernodecheck` to get info about your environment and some install help:
 
 
 ```
@@ -183,14 +183,14 @@ After the playbook has completed, execute `helpernodecheck` to get info about yo
 
 ## Create Ignition Configs
 
-Now you can start the installation process. Create an install dir.
+Now you can start the installation process. Create an install dir:
 
 ```
 mkdir ~/ocp4
 cd ~/ocp4
 ```
 
-Next, create an `install-config.yaml` file
+Next, create an `install-config.yaml` file:
 
 ```
 cat <<EOF > install-config.yaml
@@ -220,15 +220,15 @@ sshKey: 'ssh-ed25519 AAAA...'
 EOF
 ```
 
-Visit [try.openshift.com](https://cloud.redhat.com/openshift/install) and select "Bare Metal". Then copy the pull secret. Replace `pullSecret` with that pull secret and `sshKey` with your ssh public key.
+Visit [try.openshift.com](https://cloud.redhat.com/openshift/install) and select "Bare Metal". Then copy the pull secret. Replace `pullSecret` with that pull secret and `sshKey` with your ssh public key making sure to do so within the single quotes.
 
-Next, generate the ignition configs
+Next, generate the ignition configs:
 
 ```
 openshift-install create ignition-configs
 ```
 
-Finally, copy the ignition files in the `ignition` directory for the websever
+Finally, copy the ignition files in the `ignition` directory for the websever:
 
 ```
 cp ~/ocp4/*.ign /var/www/html/ignition/
