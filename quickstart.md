@@ -68,7 +68,7 @@ Download the [Kickstart file](rhel7-helper-ks.cfg) for the helper node:
 wget https://raw.githubusercontent.com/heatmiser/ocp4-upi-helpernode/master/rhel7-helper-ks.cfg
 ```
 
-Edit `rhel7-helper-ks.cfg` for your environment and use it to install the helper. The following command installs it "unattended":
+Edit `rhel7-helper-ks.cfg` for your environment and use it to install the helper VM. In the "Register Red Hat Subscription post script section of `rhel7-helper-ks.cfg`, either use your Red Hat account username/password OR subscription org ID and subscription activation key ([more precise selection of a specific subscription](https://access.redhat.com/articles/1378093)) and make sure the credentials combination you are NOT USING is commented out. The following command installs the helper VM "unattended":
 
 > **NOTE** Change the path to the ISO for your environment
 
