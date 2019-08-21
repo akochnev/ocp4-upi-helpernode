@@ -10,7 +10,7 @@ do
   sudo virsh define --file ocp4-$i.xml
 done
 
-Create a bootstrap VM and worker VM
+#Create a bootstrap VM and worker VM
 
 for i in worker bootstrap
 do 
