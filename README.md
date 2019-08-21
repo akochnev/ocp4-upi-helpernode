@@ -1,5 +1,7 @@
 # OCP4 UPI Helper Node Playbook
 
+Forked from christianh814/ocp4-upi-helpernode in order to customize portions of the OCP4 UPI installation and deployment process. Many thanks to Christian Hernandez for a fantastic base to work from!
+
 This assumes the following
 
 1. You're on a Network that has access to the internet
