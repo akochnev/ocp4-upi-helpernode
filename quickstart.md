@@ -97,7 +97,7 @@ virt-viewer --domain-name ocp4-helper
 
 Once the installation is complete, the helper VM will shut down.
 
-## Create "empty" VMs
+## Create "empty" VMs for OCP4 cluster (bootstrap, masters, and workers)
 
 Create (but do NOT install) 6 empty VMs. Please follow the [min requirements](https://docs.openshift.com/container-platform/4.1/installing/installing_bare_metal/installing-bare-metal.html#minimum-resource-requirements_installing-bare-metal) for these VMs. 
 
