@@ -228,7 +228,7 @@ Next, generate the ignition configs:
 openshift-install create ignition-configs
 ```
 
-Finally, copy the ignition files in the `ignition` directory for the websever:
+Finally, copy the ignition files in the `ignition` directory for the webserver:
 
 ```
 cp ~/ocp4/*.ign /var/www/html/ignition/
@@ -237,7 +237,7 @@ restorecon -vR /var/www/html/
 
 ## Install VMs
 
-Launch `virt-manager`, and boot the VMs into the boot menu; and select PXE. You'll be presented with the following picture.
+Launch `virt-manager`, and boot the VMs (follow the boot order presented after the picture) into the boot menu; and select PXE. You'll be presented with the following picture:
 
 ![pxe](images/pxe.png)
 
@@ -257,7 +257,7 @@ You'll see the bootstrap turn "green" and then the masters turn "green", then th
 
 ## Wait for install
 
-The boostrap VM actually does the install for you; you can track it with the following command.
+The boostrap VM actually does the install for you; you can track it with the following command:
 
 ```
 openshift-install wait-for bootstrap-complete --log-level debug
