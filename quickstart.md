@@ -1,5 +1,7 @@
 # Helper Node Quickstart Install
 
+Forked from [christianh814/ocp4-upi-helpernode](https://github.com/christianh814/ocp4-upi-helpernode) in order to customize portions of the OCP4 UPI installation and deployment process. Many thanks to Christian Hernandez for a fantastic base to work from!
+
 This quickstart will get you up and running on `libvirt`. This should work on other environments (i.e. Virtualbox); you just have to figure out how to do the virtual network on your own.
 
 > **NOTE** If you want to use static ips follow [this guide](qs-static.md)
