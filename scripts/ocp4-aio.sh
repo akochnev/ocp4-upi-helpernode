@@ -34,6 +34,7 @@ disk: sda
 helper:
   name: "helper"
   ipaddr: "192.168.7.77"
+matchbox: false
 dns:
   domain: "example.com"
   clusterid: "ocp4"

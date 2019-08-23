@@ -22,9 +22,17 @@ max-lease-time 14400;
 {% endfor %}
 		# this will not give out addresses to hosts not listed above
 		deny unknown-clients;
-
-		# this is PXE specific  
+{% if matchbox is defined and matchbox is sameas true %}
+		next-server {{ helper.ipaddr }};
+        if exists user-class and option user-class = "iPXE" {
+            filename "http://{{ helper.ipaddr }}:8080/boot.ipxe";
+        } else {
+            filename "undionly.kpxe";
+        }
+{% else %}
+        # this is PXE specific  
 		filename "pxelinux.0";  
 		next-server {{ helper.ipaddr }};
+{% endif %}
      	}
 }
