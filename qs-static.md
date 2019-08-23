@@ -96,7 +96,7 @@ git clone https://github.com/heatmiser/ocp4-upi-helpernode
 cd ocp4-upi-helpernode
 ```
 
-Create the [vars-static.yaml](./vars-static.yaml) file with the IP addresss that will be assigned to the masters/workers/boostrap. The IP addresses need to be right since they will be used to create your DNS server. 
+Create the [vars-static.yaml](./vars-static.yaml) file with the IP addresss that will be assigned to the masters/workers/bootstrap. The IP addresses need to be right since they will be used to create your DNS server. 
 
 
 ## Run the playbook
