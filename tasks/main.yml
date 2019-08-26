@@ -28,6 +28,13 @@
       state: present
     when: not staticips
 
+  - name: Install package for iPXE boot images
+    yum:
+      name:
+        - ipxe-bootimgs
+      state: present
+    when: matchbox
+
   - name: Write out dhcp file
     template:
       src: ../templates/dhcpd.conf.j2
