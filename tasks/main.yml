@@ -12,12 +12,18 @@
         - bind
         - bind-utils
         - haproxy
-        - httpd
         - vim
         - bash-completion
         - libselinux-python
         - podman
       state: present
+
+  - name: Install httpd
+    yum:
+      name:
+        - httpd
+      state: present
+    when: not matchbox
 
   - name: Install packages for DHCP/PXE install
     yum:
@@ -73,6 +79,7 @@
     copy:
       src: ../files/httpd.conf
       dest: /etc/httpd/conf/httpd.conf
+    when: not matchbox
 
   - name: Create apache directories for installing
     file:
@@ -82,12 +89,138 @@
     with_items:
       - /var/www/html/install
       - /var/www/html/ignition
+    when: not matchbox
+
+  - name: Get matchbox distribution and extract to /tmp
+    unarchive:
+      src: https://github.com/poseidon/matchbox/releases/download/v0.8.0/matchbox-v0.8.0-linux-amd64.tar.gz
+      dest: /tmp
+      extra_opts:
+      - --strip=1
+      - --wildcards
+      - '*/matchbox'
+      - '*/contrib/systemd/matchbox-local.service'
+      remote_src: True
+    when: matchbox
+
+  - name: Copy matchbox binary
+    copy:
+      src: /tmp/matchbox
+      dest: /usr/local/bin/matchbox
+      mode: '0555'
+    when: matchbox
+
+  - name: Installing matchbox Systemd unit file
+    copy:
+      src: /tmp/contrib/systemd/matchbox-local.service
+      dest: /etc/systemd/system/matchbox.service
+      mode: '0555'
+    when: matchbox
+
+  - name: Create matchbox directories
+    file:
+      path: "{{ item }}"
+      state: directory
+      mode: 0755
+    with_items:
+      - /etc/matchbox
+      - /var/lib/matchbox/assets
+      - /var/lib/matchbox/groups
+      - /var/lib/matchbox/ignition
+      - /var/lib/matchbox/profiles
+      - /var/lib/matchbox/install
+    when: matchbox
+
+  - name: Download rhcos installer initramfs, kernel, and metal bios files for matchbox
+    get_url:
+      url: https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.1/latest/{{ item }}
+      dest: /var/lib/matchbox/assets
+      mode: '0440'
+    with_items:
+      - rhcos-4.1.0-x86_64-installer-initramfs.img
+      - rhcos-4.1.0-x86_64-installer-kernel
+      - rhcos-4.1.0-x86_64-metal-bios.raw.gz
+    when: matchbox
+
+  - name: Create matchbox profiles
+    template:
+      src: ../templates/matchbox/profiles/{{ item }}.j2
+      dest: /var/lib/matchbox/profiles/{{ item }}
+      mode: 0555
+    with_items:
+      - bootstrap.json
+      - infnod.json
+      - master.json
+      - cptnod.json
+    when: matchbox
+
+  - name: Create matchbox group files - bootstrap
+    template:
+      src: ../templates/matchbox/groups/bootstrap.json.j2
+      dest: /var/lib/matchbox/groups/{{ item.name }}.json
+      mode: 0555
+    with_items:
+      - "{{ bootstrap }}"
+    when: matchbox
+
+  - name: Create matchbox group files - masters
+    template:
+      src: ../templates/matchbox/groups/master.json.j2
+      dest: /var/lib/matchbox/groups/{{ item.name }}.json
+      mode: 0555
+    with_items:
+      - "{{ masters }}"
+    when: matchbox
+
+  - name: Create matchbox group files - infrastructure nodes
+    template:
+      src: ../templates/matchbox/groups/infnod.json.j2
+      dest: /var/lib/matchbox/groups/{{ item.name }}.json
+      mode: 0555
+    with_items:
+      - "{{ infras }}"
+    when:
+      - matchbox
+      - infras is defined
+
+  - name: Create matchbox group files - workers
+    template:
+      src: ../templates/matchbox/groups/cptnod.json.j2
+      dest: /var/lib/matchbox/groups/{{ item.name }}.json
+      mode: 0555
+    with_items:
+      - "{{ workers }}"
+    when: matchbox
+
+  - name: Ensure group "matchbox" exists
+    group:
+      name: matchbox
+      state: present
+    when: matchbox
+
+  - name: create matchbox user
+    user: name={{ item.name }} group={{ item.group }} state=present shell={{ item.shell }}
+    with_items:
+      - { name: 'matchbox', group: 'matchbox', shell: '/sbin/nologin' }
+    when: matchbox
 
   - name: Get OCP4 installer Bios
     get_url:
       url: https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.1/4.1.0/rhcos-4.1.0-x86_64-metal-bios.raw.gz
       dest: /var/www/html/install/bios.raw.gz
       mode: 0555
+    when: not matchbox
+    
+  - name: Symlink bios.raw.gz when using matchbox
+    file:
+      src: /var/lib/matchbox/assets/rhcos-4.1.0-x86_64-metal-bios.raw.gz
+      dest: /var/lib/matchbox/install/bios.raw.gz
+      owner: root
+      group: root
+      state: link
+    when:
+      - not staticips
+      - matchbox
 
   - name: Open up firewall ports
     firewalld:
@@ -114,6 +247,11 @@
 
   - name: Best effort SELinux repair - Apache
     shell: "restorecon -vR /var/www/html || true"
+    when: not matchbox
+
+  - name: Best effort SELinux repair - matchbox
+    shell: "restorecon -vR /var/lib/matchbox || true"
+    when: matchbox
 
   - name: Create TFTP config
     file:
@@ -128,6 +266,36 @@
       state: directory
       mode: 0755
     when: not staticips
+ 
+  - name: Symlink kernel when using matchbox
+    file:
+      src: /var/lib/matchbox/assets/rhcos-4.1.0-x86_64-installer-kernel
+      dest: /var/lib/tftpboot/rhcos/kernel
+      owner: root
+      group: root
+      state: link
+    when:
+      - not staticips
+      - matchbox
+
+  - name: Symlink initramfs.img when using matchbox
+    file:
+      src: /var/lib/matchbox/assets/rhcos-4.1.0-x86_64-installer-initramfs.img
+      dest: /var/lib/tftpboot/rhcos/initramfs.img
+      owner: root
+      group: root
+      state: link
+    when:
+      - not staticips
+      - matchbox
+
+  - name: Recursively change ownership of a directory
+    file:
+      path: /var/lib/matchbox
+      state: directory
+      recurse: yes
+      owner: matchbox
+      group: matchbox
 
   - name: SEBool allow haproxy connect any port
     seboolean:
@@ -139,19 +307,34 @@
     shell: "cp -a /usr/share/syslinux/* /var/lib/tftpboot"
     when: not staticips
 
+  - name: Symlink undionly.kpxe when using matchbox
+    file:
+      src: /usr/share/ipxe/undionly.kpxe
+      dest: /var/lib/tftpboot/undionly.kpxe
+      owner: root
+      group: root
+      state: link
+    when:
+      - not staticips
+      - matchbox
+
   - name: Get OCP4 installer initramfs
     get_url:
       url: https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.1/4.1.0/rhcos-4.1.0-x86_64-installer-initramfs.img
       dest: /var/lib/tftpboot/rhcos/initramfs.img
       mode: 0555
-    when: not staticips
+    when:
+      - not staticips
+      - not matchbox
 
   - name: Get OCP4 installer kernel
     get_url:
       url: https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.1/4.1.0/rhcos-4.1.0-x86_64-installer-kernel
       dest: /var/lib/tftpboot/rhcos/kernel
       mode: 0555
-    when: not staticips
+    when:
+      - not staticips
+      - not matchbox
 
   - name: Set the default tftp file
     template:
@@ -179,7 +362,7 @@
       daemon_reload: yes
     when: not staticips
 
-  - name: Starting services
+  - name: Starting "{{ item }}" service
     service:
       name: "{{ item }}"
       enabled: yes
@@ -188,6 +371,20 @@
       - named
       - haproxy
       - httpd
+    when:
+      - not matchbox
+
+  - name: Starting "{{ item }}" service
+    service:
+      name: "{{ item }}"
+      enabled: yes
+      state: started
+    with_items:
+      - named
+      - haproxy
+      - matchbox
+    when:
+      - matchbox
 
   - name: Starting DHCP/PXE services
     service:
