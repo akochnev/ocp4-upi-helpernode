@@ -50,15 +50,16 @@ dhcp:
   netmaskid: "255.255.255.0"
 bootstrap:
   name: "bootstrap"
-  ipaddr: "192.168.7.20"
+  ipaddr: "192.168.7.19"
   macaddr: "$bootstrapmacaddy"
 masters:
   - name: "master"
-    ipaddr: "192.168.7.21"
+    ipaddr: "192.168.7.20"
     macaddr: "$mastermacaddy"
+infras: []
 workers:
   - name: "worker"
-    ipaddr: "192.168.7.22"
+    ipaddr: "192.168.7.40"
     macaddr: "$workermacaddy"
 EOF
 ) > aio-vars.yaml
