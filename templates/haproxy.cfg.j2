@@ -68,7 +68,7 @@ listen stats
 
 
 frontend openshift-api-server
-    bind *:6443
+    bind api.{{ dns.clusterid }}.{{ dns.domain }}:6443
     default_backend openshift-api-server
     mode tcp
     option tcplog
@@ -82,7 +82,7 @@ backend openshift-api-server
 {% endfor %}
     
 frontend machine-config-server
-    bind *:22623
+    bind api.{{ dns.clusterid }}.{{ dns.domain }}:22623
     default_backend machine-config-server
     mode tcp
     option tcplog
@@ -94,6 +94,32 @@ backend machine-config-server
 {% for m in masters %}
     server {{ m.name }} {{ m.ipaddr }}:22623 check
 {% endfor %}
+
+{% if infras|length > 0 %}
+frontend ocp4-router-http
+    mode tcp
+    option tcplog
+    bind apps.{{ dns.clusterid }}.{{ dns.domain }}:80
+    default_backend ocp4-router-http
+
+backend ocp4-router-http
+    mode tcp
+{% for i in infras %}    
+    server {{ i.name }} {{ i.name }}.{{ dns.clusterid }}.{{ dns.domain }}:80 check
+{% endfor %}
+
+frontend ocp4-router-https
+    mode tcp
+    option tcplog
+    bind apps.{{ dns.clusterid }}.{{ dns.domain }}:443
+    default_backend ocp4-router-https
+  
+backend ocp4-router-https
+    mode tcp
+{% for i in infras %}    
+    server {{ i.name }} {{ i.name }}.{{ dns.clusterid }}.{{ dns.domain }}:443 check
+{% endfor %}
+{% endif %}
   
 frontend ingress-http
     bind *:80
