@@ -20,6 +20,7 @@ api.{{ dns.clusterid }}		IN	A	{{ helper.ipaddr }}
 api-int.{{ dns.clusterid }}		IN	A	{{ helper.ipaddr }}
 ;
 ; The wildcard also points to the load balancer
+apps.{{ dns.clusterid }}		IN	A	{{ helper.ipaddr }}
 *.apps.{{ dns.clusterid }}		IN	A	{{ helper.ipaddr }}
 ;
 ; Create entry for the bootstrap host
@@ -30,6 +31,13 @@ api-int.{{ dns.clusterid }}		IN	A	{{ helper.ipaddr }}
 {{ m.name }}.{{ dns.clusterid }}		IN	A	{{ m.ipaddr }}
 {% endfor %}
 ;
+{% if infras|length > 0 %}
+; Create entries for the infra hosts
+{% for i in infras %}
+{{ i.name }}.{{ dns.clusterid }}		IN	A	{{ i.ipaddr }}
+{% endfor %}
+;
+{% endif %}
 ; Create entries for the worker hosts
 {% for w in workers %}
 {{ w.name }}.{{ dns.clusterid }}		IN	A	{{ w.ipaddr }}
